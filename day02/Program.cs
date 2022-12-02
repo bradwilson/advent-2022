@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,63 +10,68 @@ var data =
 	 where !string.IsNullOrWhiteSpace(line)
 	 select line).ToArray();
 
-var scores = new Dictionary<string, long>
-{
-	{ "X", 1 },
-	{ "Y", 2 },
-	{ "Z", 3 },
-};
+Choice ToChoice(string value) =>
+	value switch
+	{
+		"A" or "X" => Choice.Rock,
+		"B" or "Y" => Choice.Paper,
+		"C" or "Z" => Choice.Scissors,
+		_ => throw new InvalidOperationException(),
+	};
 
-var names = new Dictionary<string, string>
+Choice ToChoiceFromGoal(Choice opponent, string winTieOrLose)
 {
-	{ "A", "rock" },
-	{ "B", "paper" },
-	{ "C", "scissors" },
-	{ "X", "rock" },
-	{ "Y", "paper" },
-	{ "Z", "scissors" },
-};
+	if (winTieOrLose == "Y")
+		return opponent;
+
+	return (opponent, winTieOrLose == "Z") switch
+	{
+		(Choice.Rock, false) => Choice.Scissors,
+		(Choice.Rock, true) => Choice.Paper,
+
+		(Choice.Paper, false) => Choice.Rock,
+		(Choice.Paper, true) => Choice.Scissors,
+
+		(Choice.Scissors, false) => Choice.Paper,
+		(Choice.Scissors, true) => Choice.Rock,
+
+		_ => throw new InvalidOperationException(),
+	};
+}
+
+long ToChoiceScore(Choice me) =>
+	me switch
+	{
+		Choice.Rock => 1,
+		Choice.Paper => 2,
+		_ => 3,
+	};
+
+long ToWinnerScore(Choice opponent, Choice me)
+{
+	if (opponent == me)
+		return 3;
+
+	var doIWin = me switch
+	{
+		Choice.Rock => opponent == Choice.Scissors,
+		Choice.Paper => opponent == Choice.Rock,
+		_ => opponent == Choice.Paper,
+	};
+
+	return doIWin ? 6 : 0;
+}
 
 long GetPart1()
 {
-	bool? isWinner(string opponent, string me)
-	{
-		return (opponent, me) switch
-		{
-			("A", "X") => null,
-			("A", "Y") => true,
-			("A", "Z") => false,
-
-			("B", "X") => false,
-			("B", "Y") => null,
-			("B", "Z") => true,
-
-			("C", "X") => true,
-			("C", "Y") => false,
-			("C", "Z") => null,
-			_ => throw new InvalidOperationException(),
-		};
-	}
-
-	long winnerScore(bool? winner)
-	{
-		return winner switch
-		{
-			true => 6,
-			false => 0,
-			_ => 3,
-		};
-	}
-
 	var score = 0L;
 
 	foreach (var line in data)
 	{
 		var pieces = line.Split(" ");
-		var opponent = pieces[0];
-		var me = pieces[1];
-		var winner = isWinner(opponent, me);
-		var lineScore = scores[me] + winnerScore(winner);
+		var opponent = ToChoice(pieces[0]);
+		var me = ToChoice(pieces[1]);
+		var lineScore = ToWinnerScore(opponent, me) + ToChoiceScore(me);
 		score += lineScore;
 	}
 
@@ -76,45 +80,14 @@ long GetPart1()
 
 long GetPart2()
 {
-	string chooseWeapon(string opponent, string result)
-	{
-		return (opponent, result) switch
-		{
-			("A", "X") => "Z",
-			("A", "Y") => "X",
-			("A", "Z") => "Y",
-
-			("B", "X") => "X",
-			("B", "Y") => "Y",
-			("B", "Z") => "Z",
-
-			("C", "X") => "Y",
-			("C", "Y") => "Z",
-			("C", "Z") => "X",
-			_ => throw new InvalidOperationException(),
-		};
-	}
-
-	long winnerScore(string result)
-	{
-		return result switch
-		{
-			"X" => 0,
-			"Y" => 3,
-			"Z" => 6,
-			_ => throw new InvalidOperationException(),
-		};
-	}
-
 	var score = 0L;
 
 	foreach (var line in data)
 	{
 		var pieces = line.Split(" ");
-		var opponent = pieces[0];
-		var result = pieces[1];
-		var me = chooseWeapon(opponent, result);
-		var lineScore = scores[me] + winnerScore(result);
+		var opponent = ToChoice(pieces[0]);
+		var me = ToChoiceFromGoal(opponent, pieces[1]);
+		var lineScore = ToWinnerScore(opponent, me) + ToChoiceScore(me);
 		score += lineScore;
 	}
 
@@ -130,3 +103,5 @@ Console.WriteLine($"[{stopwatch.Elapsed}] Part 1: {part1Result}");
 stopwatch = Stopwatch.StartNew();
 var part2Result = GetPart2();
 Console.WriteLine($"[{stopwatch.Elapsed}] Part 2: {part2Result}");
+
+enum Choice { Rock, Paper, Scissors };
