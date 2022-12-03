@@ -13,12 +13,16 @@ var data =
 
 long GetPart1()
 {
-	return 0L;
+	var result = 0L;
+
+	return result;
 }
 
 long GetPart2()
 {
-	return 0L;
+	var result = 0L;
+
+	return result;
 }
 
 Console.WriteLine($"[{stopwatch.Elapsed}] Pre-compute");
