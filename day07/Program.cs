@@ -12,38 +12,40 @@ var data =
 	 select line).ToArray();
 
 var folders = new Dictionary<string, Folder>();
-var root = new Folder("/");
-folders["/"] = root;
-
-var currentPath = "/";
-var currentFolder = root;
-
-string GetFullPath(string baseFolder, string subFolder) =>
-	Path.GetFullPath(Path.Combine("C:/", baseFolder, subFolder)).Replace("\\", "/").Replace("C:", "");
+string? currentPath = null;
+Folder? currentFolder = null;
+var folderStack = new Stack<string>();
 
 foreach (var instruction in data)
 {
 	if (instruction.StartsWith("$ cd "))
 	{
-		currentPath = GetFullPath(currentPath, instruction.Substring(5));
-		currentFolder = folders[currentPath];
+		var subPath = instruction[5..];
+		if (subPath == "..")
+		{
+			currentPath = folderStack.Pop();
+			currentFolder = folders[currentPath];
+		}
+		else
+		{
+			if (currentPath != null)
+				folderStack.Push(currentPath);
+
+			currentPath = (currentPath + "/" + subPath).Replace("//", "/");
+			currentFolder?.SubFolders.Add(currentPath);
+			currentFolder = new Folder(currentPath);
+			folders.Add(currentPath, currentFolder);
+		}
 	}
 	else if (instruction == "$ ls")
-	{
-		// We parse the results, nothing to do here
-	}
+	{ }  // We process the results, not the instruction
 	else if (instruction.StartsWith("dir "))
-	{
-		var newDirName = GetFullPath(currentPath, instruction.Substring(4));
-		currentFolder.SubFolders.Add(newDirName);
-		var childFolder = new Folder(newDirName);
-		folders.Add(newDirName, childFolder);
-	}
+	{ }  // We record new directories during 'cd'
 	else
 	{
 		var pieces = instruction.Split(' ');
 		var size = long.Parse(pieces[0]);
-		currentFolder.FileSizes += size;
+		currentFolder!.FileSizes += size;
 	}
 }
 
@@ -63,11 +65,8 @@ long GetPart1()
 
 long GetPart2()
 {
-	var totalSpace = 70000000;
-	var targetSpace = 30000000;
-	var unusedSpace = totalSpace - root.TotalSize(folders);
-	var neededSpace = targetSpace - unusedSpace;
-
+	var root = folders["/"];
+	var neededSpace = 30000000 - (70000000 - root.TotalSize(folders));
 	var targetToDelete = root;
 	var targetToDeleteSize = root.TotalSize(folders);
 
