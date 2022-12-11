@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
