@@ -58,11 +58,10 @@ void ComputeCost(int x, int y)
 	ComputeNeighbor(x, y + 1);
 }
 
-long GetPart1()
-{
-	ComputeCost(end.x, end.y);
-	return distanceCache[(start.x, start.y)];
-}
+ComputeCost(end.x, end.y);
+
+long GetPart1() =>
+	distanceCache[(start.x, start.y)];
 
 long GetPart2()
 {
