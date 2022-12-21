@@ -49,16 +49,8 @@ class Pattern : IEquatable<Pattern>
 	public override bool Equals(object? obj) =>
 		Equals(obj as Pattern);
 
-	public override int GetHashCode()
-	{
-		unchecked
-		{
-			int hash = 27;
-			hash = (13 * hash) + AirIndex.GetHashCode();
-			hash = (13 * hash) + setComparer.GetHashCode(Stones);
-			return hash;
-		}
-	}
+	public override int GetHashCode() =>
+		HashCode.Combine(AirIndex, setComparer.GetHashCode(Stones));
 }
 
 static class Runner

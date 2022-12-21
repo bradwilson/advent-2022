@@ -162,22 +162,8 @@ class GameState
 		this.timeLeft = timeLeft;
 	}
 
-	public override int GetHashCode()
-	{
-		unchecked
-		{
-			int hash = 27;
-			hash = (13 * hash) + ore;
-			hash = (13 * hash) + oreMachines;
-			hash = (13 * hash) + clay;
-			hash = (13 * hash) + clayMachines;
-			hash = (13 * hash) + obsidian;
-			hash = (13 * hash) + obsidianMachines;
-			hash = (13 * hash) + geodes;
-			hash = (13 * hash) + geodeMachines;
-			return hash;
-		}
-	}
+	public override int GetHashCode() =>
+		HashCode.Combine(ore, oreMachines, clay, clayMachines, obsidian, obsidianMachines, geodes, geodeMachines);
 
 	public override bool Equals(object? obj)
 	{
