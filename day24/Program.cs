@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Nito.Collections;
 
 var stopwatch = Stopwatch.StartNew();
 
@@ -66,13 +65,13 @@ Console.WriteLine($"[{stopwatch.Elapsed}] Pre-compute");
 stopwatch = Stopwatch.StartNew();
 
 var visited = new HashSet<(int x, int y, int step, short stage)>();
-var toRun = new Deque<(int x, int y, int step, short stage)>();
-toRun.AddToBack((1, 0, 0, 0));
+var toRun = new Queue<(int x, int y, int step, short stage)>();
+toRun.Enqueue((1, 0, 0, 0));
 var foundPart1 = false;
 
 while (toRun.Count != 0)
 {
-	var current = toRun.RemoveFromFront();
+	var current = toRun.Dequeue();
 	var (x, y, step, stage) = current;
 	if (x < 0 || x > maxX || y < 0 || y > maxY || data[y][x] == '#')
 		continue;
@@ -106,26 +105,13 @@ while (toRun.Count != 0)
 
 	var obstacles = occupiedSpotsByRound[step % occupiedSpotsByRound.Count];
 	if (!obstacles.Contains((x, y)))
-		toRun.AddToBack((x, y, step + 1, stage));
+		toRun.Enqueue((x, y, step + 1, stage));
 	if (!obstacles.Contains((x + 1, y)))
-		toRun.AddToBack((x + 1, y, step + 1, stage));
+		toRun.Enqueue((x + 1, y, step + 1, stage));
 	if (!obstacles.Contains((x - 1, y)))
-		toRun.AddToBack((x - 1, y, step + 1, stage));
+		toRun.Enqueue((x - 1, y, step + 1, stage));
 	if (!obstacles.Contains((x, y + 1)))
-		toRun.AddToBack((x, y + 1, step + 1, stage));
+		toRun.Enqueue((x, y + 1, step + 1, stage));
 	if (!obstacles.Contains((x, y - 1)))
-		toRun.AddToBack((x, y - 1, step + 1, stage));
-}
-
-void PrintSpots(HashSet<(int x, int y)> occupiedSpots)
-{
-	for (int y = 0; y < data.Length; ++y)
-	{
-		for (int x = 0; x < data[0].Length; ++x)
-			Console.Write(occupiedSpots.Contains((x, y)) ? '*' : data[y][x] == '#' ? '#' : '.');
-
-		Console.WriteLine();
-	}
-
-	Console.WriteLine();
+		toRun.Enqueue((x, y - 1, step + 1, stage));
 }
